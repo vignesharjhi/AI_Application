@@ -1,0 +1,6 @@
+{
+  "name": "IT Company Knowledge Repository",
+  "description": "Internal knowledge repository for HR, Leave, IT Security and other company policies, with categorized document ingestion, vector search, and grounded AI chat.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
