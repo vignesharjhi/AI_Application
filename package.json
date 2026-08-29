@@ -4,27 +4,34 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n FRONTEND,BACKEND -c blue,green \"vite\" \"npm run dev:backend\"",
-    "dev:backend": "python backend/main.py",
-    "build": "vite build",
-    "start": "python backend/main.py",
+    "dev": "tsx server.ts",
+    "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "start": "node dist/server.cjs",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@google/genai": "^2.19.0",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
+    "pdf-parse": "^2.4.5",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "vite": "^6.2.3"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/node": "^22.14.0",
+    "@types/pdf-parse": "^1.1.5",
     "autoprefixer": "^10.4.21",
     "concurrently": "^9.1.0",
+    "esbuild": "^0.28.2",
     "tailwindcss": "^4.1.14",
+    "tsx": "^4.23.12",
     "typescript": "~5.8.2",
     "vite": "^6.2.3"
   }

@@ -1,5 +1,5 @@
 import React from "react";
-import { Database, FileText, MessageSquareText, SlidersHorizontal, Sparkles, Cpu } from "lucide-react";
+import { Database, FileText, MessageSquareText, SlidersHorizontal, Sparkles, Cpu, Presentation, BookOpen, Layers } from "lucide-react";
 import { VectorStoreStats } from "../types";
 
 interface HeaderProps {
@@ -102,6 +102,39 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="text-gray-700 font-medium">{ragEnabled ? "RAG Active" : "Direct LLM"}</span>
               </div>
             </div>
+
+            <a
+              href="/screens-document.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-colors shadow-xs"
+              title="Open Automated Screen Captures & Single Document"
+            >
+              <Layers className="h-4 w-4 text-emerald-200" />
+              <span className="hidden sm:inline">Screens Doc</span>
+            </a>
+
+            <a
+              href="/walkthrough.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors shadow-xs"
+              title="Open Visual Application Walkthrough & Functional Screens"
+            >
+              <BookOpen className="h-4 w-4 text-blue-200" />
+              <span className="hidden sm:inline">Walkthrough</span>
+            </a>
+
+            <a
+              href="/presentation.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors shadow-xs"
+              title="Open Technical Presentation & Pitch Deck"
+            >
+              <Presentation className="h-4 w-4 text-blue-400" />
+              <span className="hidden sm:inline">Pitch Deck</span>
+            </a>
 
             <button
               onClick={onOpenSettings}

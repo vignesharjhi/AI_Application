@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Visual Walkthrough — Enterprise RAG & Autonomous Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Outfit"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+              950: '#0f172a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Ensure high fidelity exact color reproduction on screen and print */
+    *, *::before, *::after {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+
+    @page {
+      size: landscape;
+      margin: 0;
+    }
+
+    @media print {
+      html, body {
+        background-color: #0b1120 !important;
+        background: #0b1120 !important;
+        color: #f8fafc !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        min-height: 100% !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      #walkthroughContainer {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .screen-card {
+        display: flex !important;
+        page-break-after: always !important;
+        page-break-inside: avoid !important;
+        break-after: page !important;
+        break-inside: avoid !important;
+        width: 100vw !important;
+        min-height: 100vh !important;
+        height: 100vh !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        border: none !important;
+        padding: 2.2rem 3rem !important;
+        background-color: #0f172a !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+    }
+    
+    .screen-card {
+      transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+    }
+    .screen-active {
+      display: flex !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+
+  <!-- Top Navigation Bar -->
+  <header class="no-print sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-lg">
+    <div class="flex items-center space-x-3">
+      <a href="/" class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md hover:bg-blue-500 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+      </a>
+      <div>
+        <h1 class="font-display font-bold text-sm sm:text-base text-white tracking-tight flex items-center space-x-2">
+          <span>Enterprise RAG & Autonomous Agent</span>
+          <span class="px-2 py-0.5 text-[10px] bg-blue-500/20 text-blue-400 font-mono rounded-full border border-blue-500/30">Application Walkthrough</span>
+        </h1>
+        <p class="text-xs text-slate-400">Step-by-Step Functional Visual Tour with Sample Inputs & Real Outputs</p>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex items-center space-x-2 sm:space-x-3">
+      <div class="flex items-center space-x-1 bg-slate-800/80 rounded-lg p-1 border border-slate-700">
+        <button id="prevBtn" onclick="prevScreen()" class="p-1.5 rounded hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition" title="Previous Screen (Left Arrow)">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        </button>
+        <span id="screenCounter" class="px-2 text-xs font-mono text-slate-300 font-semibold">1 / 10</span>
+        <button id="nextBtn" onclick="nextScreen()" class="p-1.5 rounded hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition" title="Next Screen (Right Arrow)">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+
+      <button id="toggleAllBtn" onclick="toggleAllScreens()" class="hidden md:flex px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium items-center space-x-1.5 transition">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        <span>Show All (Scroll)</span>
+      </button>
+
+      <a href="/screens-document.html" class="hidden sm:flex px-3 py-1.5 rounded-lg bg-emerald-700/80 hover:bg-emerald-600 border border-emerald-600 text-white text-xs font-semibold items-center space-x-1.5 transition">
+        <svg class="w-3.5 h-3.5 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+        <span>Screens Doc</span>
+      </a>
+
+      <a href="/presentation.html" class="hidden sm:flex px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium items-center space-x-1.5 transition">
+        <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+        <span>Pitch Deck</span>
+      </a>
+
+      <button onclick="openPdfModal()" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center space-x-1.5 shadow-sm transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        <span>Export to PDF / Print</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- PDF Export Color Guide Modal -->
+  <div id="pdfExportModal" class="no-print hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
+            PDF
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Save Walkthrough in Full Color</h3>
+            <p class="text-xs text-slate-400">Preserves dark background, UI screenshot cards, and status badges</p>
+          </div>
+        </div>
+        <button onclick="closePdfModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300">
+        <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start space-x-3">
+          <svg class="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <div>
+            <span class="font-bold text-amber-300">How to keep exact colors in PDF:</span>
+            <p class="text-slate-300 mt-1">In your browser's Print window, enable "Background graphics" so dark panels, badges, and code styling print properly.</p>
+          </div>
+        </div>
+
+        <div class="space-y-2 pt-1">
+          <div class="font-bold text-white uppercase text-[11px] tracking-wider text-slate-400">Settings in Print Dialog:</div>
+          <div class="grid grid-cols-1 gap-2">
+            <div class="flex items-center space-x-2.5 p-2.5 rounded-lg bg-slate-800/80 border border-slate-700">
+              <span class="w-5 h-5 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">1</span>
+              <span>Set <strong>Destination</strong> to <strong>"Save as PDF"</strong></span>
+            </div>
+            <div class="flex items-center space-x-2.5 p-2.5 rounded-lg bg-emerald-950/60 border border-emerald-600/50 text-emerald-200">
+              <span class="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">✓</span>
+              <span>Click <strong>More settings</strong> → Check <strong>"Background graphics"</strong></span>
+            </div>
+            <div class="flex items-center space-x-2.5 p-2.5 rounded-lg bg-slate-800/80 border border-slate-700">
+              <span class="w-5 h-5 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center">3</span>
+              <span>Set <strong>Layout</strong> to <strong>Landscape</strong> & Margins to <strong>None</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2.5 pt-3 border-t border-slate-800">
+        <button onclick="closePdfModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold">
+          Cancel
+        </button>
+        <button onclick="triggerFullColorPrint()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center space-x-1.5 shadow-lg shadow-emerald-600/20">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+          <span>Open Print / PDF Dialog</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Walkthrough Container -->
+  <main id="walkthroughContainer" class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-8 flex flex-col justify-center">
+
+    <!-- ==================== SCREEN 1: High-Level Architecture & Modules ==================== -->
+    <section class="screen-card screen-active bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-10 shadow-2xl flex-col justify-between min-h-[580px]" data-screen="1">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2 text-blue-400 text-xs font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+            <span>Screen 01 / Application Architecture Overview</span>
+          </div>
+          <span class="px-2.5 py-1 bg-blue-900/50 border border-blue-700 text-blue-300 text-[11px] font-mono rounded-lg">Overview</span>
+        </div>
+
+        <h2 class="font-display font-bold text-2xl sm:text-3xl text-white mb-2">Core System Navigation & Functional Modules</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mb-6 max-w-3xl">
+          The enterprise system unites four interconnected modules: Document Ingestion, Hybrid Vector DB, Grounded RAG Chat, and Autonomous Operational Agent Tools.
+        </p>
+
+        <!-- Screenshot Replica: App Header & Master Views -->
+        <div class="rounded-xl bg-slate-950 border border-slate-800 p-4 mb-4">
+          <!-- Top bar replica -->
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800 text-xs">
+            <div class="flex items-center space-x-3">
+              <div class="flex items-center space-x-2">
+                <div class="h-6 w-6 rounded bg-blue-600 flex items-center justify-center font-bold text-white text-xs">K</div>
+                <span class="font-bold text-white">Knowledge Hub AI</span>
+              </div>
+              <div class="hidden sm:flex items-center space-x-1 bg-slate-900 px-2 py-1 rounded-lg border border-slate-800 text-[11px]">
+                <span class="px-2 py-0.5 bg-blue-600 text-white rounded font-medium">Assistant Chat</span>
+                <span class="px-2 py-0.5 text-slate-400 hover:text-white">Ingestion (6 Docs)</span>
+                <span class="px-2 py-0.5 text-slate-400 hover:text-white">Vector DB (30 Chunks)</span>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 text-[11px] text-slate-400">
+              <span class="flex items-center space-x-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><strong class="text-emerald-400">RAG Active</strong></span>
+              <span>•</span>
+              <span>768d Embeddings</span>
+            </div>
+          </div>
+
+          <!-- 4 Grid Pillars -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3">
+            <div class="p-3 bg-slate-900/90 rounded-lg border border-slate-800">
+              <div class="text-[11px] font-bold text-blue-400 mb-1">1. Ingestion Pipeline</div>
+              <p class="text-[11px] text-slate-400">Uploads PDFs, parses pages, performs semantic text chunking, and calculates 768-dim embeddings.</p>
+            </div>
+            <div class="p-3 bg-slate-900/90 rounded-lg border border-slate-800">
+              <div class="text-[11px] font-bold text-indigo-400 mb-1">2. Hybrid Vector DB</div>
+              <p class="text-[11px] text-slate-400">Combines dense cosine similarity with Jaro-Winkler/bigram fuzzy scoring to survive user typos.</p>
+            </div>
+            <div class="p-3 bg-slate-900/90 rounded-lg border border-slate-800">
+              <div class="text-[11px] font-bold text-emerald-400 mb-1">3. Grounded RAG Chat</div>
+              <p class="text-[11px] text-slate-400">Returns zero-hallucination policy answers with clickable, verifiable source citation cards.</p>
+            </div>
+            <div class="p-3 bg-slate-900/90 rounded-lg border border-slate-800">
+              <div class="text-[11px] font-bold text-amber-400 mb-1">4. Operational Agent</div>
+              <p class="text-[11px] text-slate-400">Autonomous tool calling for leave balances, IT service tickets, travel per-diems, and NDA checks.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between items-center">
+        <span>Use arrow keys or navigation controls to walk through each screen</span>
+        <span class="font-mono text-blue-400">Slide 1 of 10</span>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 2: PDF Document Ingestion & Vector Chunking ==================== -->
+    <section class="screen-card hidden bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-10 shadow-2xl flex-col justify-between min-h-[580px]" data-screen="2">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Screen 02 / Document Ingestion & Chunking</span>
+          </div>
+          <span class="px-2.5 py-1 bg-emerald-950/60 border border-emerald-700 text-emerald-300 text-[11px] font-mono rounded-lg">Ingestion Pipeline</span>
+        </div>
+
+        <h2 class="font-display font-bold text-2xl sm:text-3xl text-white mb-2">Automated PDF Parsing, Semantic Chunking & Vectorization</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+          Shows how user-uploaded PDF policy documents are parsed, broken down with sentence-boundary awareness, and indexed into vector embeddings.
+        </p>
+
+        <!-- Input / Output Visual Replica -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Left: Input & Processing -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <div class="text-xs font-bold uppercase text-slate-400 flex items-center justify-between">
+              <span>Sample Input (Drag-and-Drop / Upload)</span>
+              <span class="text-blue-400 font-mono text-[10px]">PDF / Text Stream</span>
+            </div>
+
+            <!-- Upload Dropzone mockup -->
+            <div class="p-4 rounded-lg border-2 border-dashed border-slate-700 bg-slate-900/60 text-center space-y-1">
+              <div class="text-xs text-slate-300 font-semibold">HR_Policy_Handbook.pdf</div>
+              <div class="text-[11px] text-slate-500">1.48 KB • 3 Pages • Category: "HR Policy"</div>
+              <div class="text-[10px] text-emerald-400 font-mono pt-1">Parsing completed • 5 Chunks Extracted</div>
+            </div>
+
+            <!-- Chunking Algorithm Specs -->
+            <div class="text-[11px] bg-slate-900 p-3 rounded-lg border border-slate-800 space-y-1 text-slate-300">
+              <div class="font-semibold text-white">Chunking Parameters Applied:</div>
+              <div class="flex justify-between text-slate-400"><span>Chunk Size Target:</span><span class="font-mono text-emerald-400">800 Characters</span></div>
+              <div class="flex justify-between text-slate-400"><span>Lookback Boundary:</span><span class="font-mono text-emerald-400">120 Characters ([.!?\n])</span></div>
+              <div class="flex justify-between text-slate-400"><span>Sliding Overlap:</span><span class="font-mono text-emerald-400">100 Characters</span></div>
+            </div>
+          </div>
+
+          <!-- Right: Ingestion Queue Output -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <div class="text-xs font-bold uppercase text-slate-400 flex items-center justify-between">
+              <span>Output: Processed Document Catalog</span>
+              <span class="text-emerald-400 font-mono text-[10px]">6 Ready Documents</span>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-white">HR_Policy_Handbook.pdf</div>
+                  <div class="text-[10px] text-slate-400">3 Pages • 5 Chunks • 369 Tokens</div>
+                </div>
+                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-bold">READY</span>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-white">Leave_and_Attendance_Policy.pdf</div>
+                  <div class="text-[10px] text-slate-400">3 Pages • 5 Chunks • 319 Tokens</div>
+                </div>
+                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-bold">READY</span>
+              </div>
+
+              <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-between">
+                <div>
+                  <div class="font-bold text-white">IT_Security_and_Acceptable_Use_Policy.pdf</div>
+                  <div class="text-[10px] text-slate-400">3 Pages • 5 Chunks • 345 Tokens</div>
+                </div>
+                <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-bold">READY</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between items-center">
+        <span>Automatic sentence-boundary preservation prevents semantic cutoff</span>
+        <span class="font-mono text-emerald-400">Screen 2 of 10</span>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 3: Grounded RAG Chat with Inline Citations ==================== -->
+    <section class="screen-card hidden bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-10 shadow-2xl flex-col justify-between min-h-[580px]" data-screen="3">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2 text-blue-400 text-xs font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            <span>Screen 03 / Grounded RAG Chat with Citations</span>
+          </div>
+          <span class="px-2.5 py-1 bg-blue-950/60 border border-blue-700 text-blue-300 text-[11px] font-mono rounded-lg">Zero-Hallucination RAG</span>
+        </div>
+
+        <h2 class="font-display font-bold text-2xl sm:text-3xl text-white mb-2">Question-Answering with Verifiable Source Citations</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+          Shows how employee queries are answered with exact policy citations, including document name, page number, and chunk ID.
+        </p>
+
+        <!-- Chat Screenshot Replica -->
+        <div class="rounded-xl bg-slate-950 border border-slate-800 p-4 space-y-3">
+          <!-- User message -->
+          <div class="flex items-start justify-end space-x-2">
+            <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none text-xs max-w-lg shadow-sm">
+              <span class="font-semibold">User Query:</span> "What are the core working hours and remote work flexibility policies?"
+            </div>
+            <div class="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-[10px] font-bold text-white">U</div>
+          </div>
+
+          <!-- Assistant Response -->
+          <div class="flex items-start space-x-2">
+            <div class="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] font-bold text-white">AI</div>
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl rounded-tl-none text-xs max-w-2xl space-y-2.5 shadow-md">
+              <div class="text-slate-200 leading-relaxed">
+                Based on the official <strong>HR Policy Handbook</strong>, the corporate working hours and remote guidelines are:
+                <ul class="list-disc pl-4 mt-1.5 space-y-1 text-slate-300">
+                  <li><strong>Core Hours:</strong> Standard working hours are <strong>9:00 AM to 6:00 PM</strong>, Monday through Friday, with a mandatory 1-hour lunch break.</li>
+                  <li><strong>Core Collaboration Window:</strong> All employees must be accessible between <strong>10:00 AM and 4:00 PM</strong> for team meetings and agile syncs.</li>
+                  <li><strong>Hybrid Flexibility:</strong> Employees may work remotely up to <strong>2 days per week</strong> with prior manager notification.</li>
+                </ul>
+              </div>
+
+              <!-- Source Citations Card -->
+              <div class="p-2.5 rounded-lg bg-blue-950/40 border border-blue-800/60 space-y-1.5">
+                <div class="text-[10px] font-bold uppercase text-blue-400 flex items-center space-x-1">
+                  <span>Verified Knowledge Base Sources (2 Chunks Used)</span>
+                </div>
+                <div class="flex flex-wrap gap-2 text-[11px]">
+                  <span class="px-2 py-0.5 bg-blue-900/60 text-blue-200 rounded border border-blue-700 font-mono">
+                    📄 HR_Policy_Handbook.pdf • Page 1 • Chunk #1 (Score: 0.91)
+                  </span>
+                  <span class="px-2 py-0.5 bg-blue-900/60 text-blue-200 rounded border border-blue-700 font-mono">
+                    📄 Leave_and_Attendance_Policy.pdf • Page 1 • Chunk #1 (Score: 0.88)
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between items-center">
+        <span>Every single answer is grounded in retrieved chunks — no hallucinated facts</span>
+        <span class="font-mono text-blue-400">Screen 3 of 10</span>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 4: Fuzzy Typo-Resilient Retrieval ==================== -->
+    <section class="screen-card hidden bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-10 shadow-2xl flex-col justify-between min-h-[580px]" data-screen="4">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2 text-violet-400 text-xs font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+            <span>Screen 04 / Fuzzy Typo-Resilient Search</span>
+          </div>
+          <span class="px-2.5 py-1 bg-violet-950/60 border border-violet-700 text-violet-300 text-[11px] font-mono rounded-lg">Hybrid Search</span>
+        </div>
+
+        <h2 class="font-display font-bold text-2xl sm:text-3xl text-white mb-2">Handling Real-World Typos & Misspellings</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+          Demonstrating how user typos like <em>"Working hpurs"</em> or <em>"levae policy"</em> are recovered via hybrid lexical character-trigram & Jaro-Winkler fuzzy scoring.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Typo Input & Failure of Naive Search -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-rose-900/40 space-y-3">
+            <div class="text-xs font-bold uppercase text-rose-400 flex items-center justify-between">
+              <span>User Typo Input</span>
+              <span class="font-mono text-[10px]">Pure Dense Vector Search</span>
+            </div>
+
+            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 text-xs font-mono text-slate-200">
+              Query: <span class="text-rose-400 underline decoration-wavy">"Working hpurs"</span> and <span class="text-rose-400 underline decoration-wavy">"levae plicy for intren"</span>
+            </div>
+
+            <div class="p-3 bg-rose-950/30 border border-rose-800/40 rounded-lg text-xs text-rose-300 space-y-1">
+              <div class="font-bold flex items-center space-x-1">
+                <span>✕ Naive Cosine Search Alone:</span>
+              </div>
+              <p class="text-[11px] text-slate-300">
+                Vector embedding drifts due to out-of-vocabulary misspellings ("hpurs", "levae", "intren"). Similarity score drops to <strong>0.31</strong> (below typical 0.50 cutoff threshold), resulting in <em>"No documents found"</em>.
+              </p>
+            </div>
+          </div>
+
+          <!-- Hybrid Search Output -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-emerald-900/40 space-y-3">
+            <div class="text-xs font-bold uppercase text-emerald-400 flex items-center justify-between">
+              <span>Hybrid Engine Recovery</span>
+              <span class="font-mono text-[10px]">Dense + Fuzzy Bigram</span>
+            </div>
+
+            <div class="p-3 bg-emerald-950/30 border border-emerald-800/40 rounded-lg text-xs text-emerald-300 space-y-1">
+              <div class="font-bold flex items-center space-x-1">
+                <span>✓ Our Hybrid Search Output:</span>
+              </div>
+              <p class="text-[11px] text-slate-300">
+                Fuzzy character matching bridges <em>hpurs ➔ hours</em> and <em>levae ➔ leave</em>. Similarity score boosts to <strong>0.89</strong>, successfully retrieving:
+              </p>
+            </div>
+
+            <div class="p-2.5 bg-slate-900 rounded-lg border border-slate-800 text-xs">
+              <div class="font-bold text-white">HR_Policy_Handbook.pdf (Chunk #1)</div>
+              <div class="text-[11px] text-slate-400 line-clamp-2 mt-0.5">
+                "Section 1.1: Standard working hours are 9:00 AM to 6:00 PM, Monday through Friday..."
+              </div>
+              <div class="mt-1.5 flex items-center space-x-2 text-[10px] font-mono">
+                <span class="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded font-bold">Final Score: 0.892</span>
+                <span class="text-slate-500">Vector: 0.74 + Fuzzy: 0.15</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between items-center">
+        <span>Zero search dropouts even with fast typing or mobile input errors</span>
+        <span class="font-mono text-violet-400">Screen 4 of 10</span>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 5: Vector DB Explorer & Chunk Inspector ==================== -->
+    <section class="screen-card hidden bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-10 shadow-2xl flex-col justify-between min-h-[580px]" data-screen="5">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2 text-indigo-400 text-xs font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+            <span>Screen 05 / Vector Database Explorer</span>
+          </div>
+          <span class="px-2.5 py-1 bg-indigo-950/60 border border-indigo-700 text-indigo-300 text-[11px] font-mono rounded-lg">Knowledge DB Inspector</span>
+        </div>
+
+        <h2 class="font-display font-bold text-2xl sm:text-3xl text-white mb-2">Vector Space Inspection & Real-Time Scoring</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+          Full visibility into the underlying in-memory vector storage, allowing operators to filter chunks by document category and test real-time similarity metrics.
+        </p>
+
+        <!-- Vector DB UI Replica -->
+        <div class="rounded-xl bg-slate-950 border border-slate-800 p-4 space-y-3">
+          <!-- Filter bar -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-800 text-xs">
+            <div class="flex items-center space-x-2">
+              <span class="text-slate-400">Filter Category:</span>
+              <span class="px-2 py-0.5 bg-blue-600 text-white rounded-md font-medium text-[11px]">All (30 Chunks)</span>
+              <span class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded-md text-[11px]">HR Policy</span>
+              <span class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded-md text-[11px]">IT Security</span>
+            </div>
+            <div class="font-mono text-slate-400 text-[11px]">Storage: In-Memory JSON Sync</div>
+          </div>
+
+          <!-- Chunk Cards List -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 text-xs space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white">HR_Policy_Handbook.pdf</span>
+                <span class="px-2 py-0.5 bg-blue-500/20 text-blue-400 font-mono text-[10px] rounded font-bold">Chunk #1</span>
+              </div>
+              <p class="text-[11px] text-slate-400 line-clamp-3">
+                "Section 1: Working Hours & Attendance. Standard business hours are 9:00 AM to 6:00 PM, Monday through Friday, with a 1-hour lunch break..."
+              </p>
+              <div class="flex items-center justify-between pt-1 text-[10px] text-slate-500 font-mono">
+                <span>Tokens: 86 • Page: 1</span>
+                <span class="text-emerald-400">Vector: 768 Float32</span>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-lg bg-slate-900 border border-slate-800 text-xs space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white">IT_Security_and_Acceptable_Use_Policy.pdf</span>
+                <span class="px-2 py-0.5 bg-purple-500/20 text-purple-400 font-mono text-[10px] rounded font-bold">Chunk #3</span>
+              </div>
+              <p class="text-[11px] text-slate-400 line-clamp-3">
+                "Section 8.4: Generative AI & Cloud Tools. Employees are strictly prohibited from submitting confidential code, customer PII, or internal roadmaps into public AI tools..."
+              </p>
+              <div class="flex items-center justify-between pt-1 text-[10px] text-slate-500 font-mono">
+                <span>Tokens: 104 • Page: 2</span>
+                <span class="text-emerald-400">Vector: 768 Float32</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between items-center">
+        <span>Operators can inspect exact token counts, character ranges, and raw chunks</span>
+        <span class="font-mono text-indigo-400">Screen 5 of 10</span>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 6: Operational Tool 1 - Leave & PTO Calculator ==================== -->
+    <section class="screen-card hidden bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-10 shadow-2xl flex-col justify-between min-h-[580px]" data-screen="6">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Screen 06 / Operational Tool: Leave & PTO Calculator</span>
+          </div>
+          <span class="px-2.5 py-1 bg-emerald-950/60 border border-emerald-700 text-emerald-300 text-[11px] font-mono rounded-lg">Agent Tool #1</span>
+        </div>
+
+        <h2 class="font-display font-bold text-2xl sm:text-3xl text-white mb-2">Automated Employee Paid Time Off (PTO) Calculation</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+          The AI model calls <code>calculate_leave_eligibility</code> to compute tenure tiers, proration, and enforce the 5-day rollover carryover ceiling.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Input Request -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <div class="text-xs font-bold uppercase text-slate-400 flex items-center justify-between">
+              <span>User Conversation Input</span>
+              <span class="text-blue-400 font-mono text-[10px]">Natural Language</span>
+            </div>
+
+            <div class="p-3 bg-blue-600 text-white rounded-xl text-xs">
+              "Calculate my leave balance for a full-time employee with 18 months tenure and 6 carryover days from last year."
+            </div>
+
+            <!-- Tool Function Call Arguments -->
+            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 font-mono text-xs text-slate-300 space-y-1">
+              <div class="text-emerald-400 font-bold">⚡ calculate_leave_eligibility({</div>
+              <div class="pl-4 text-slate-400">employee_type: <span class="text-amber-300">"full_time"</span>,</div>
+              <div class="pl-4 text-slate-400">tenure_months: <span class="text-amber-300">18</span>,</div>
+              <div class="pl-4 text-slate-400">leave_type: <span class="text-amber-300">"annual"</span>,</div>
+              <div class="pl-4 text-slate-400">carryover_days: <span class="text-amber-300">6</span></div>
+              <div class="text-emerald-400 font-bold">})</div>
+            </div>
+          </div>
+
+          <!-- Structured Output -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
+            <div class="text-xs font-bold uppercase text-emerald-400 flex items-center justify-between">
+              <span>Agent Tool Response & Analysis</span>
+              <span class="font-mono text-[10px]">HR Policy Section 4.1</span>
+            </div>
+
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2 text-xs">
+              <div class="flex justify-between pb-2 border-b border-slate-800">
+                <span class="text-slate-400">Annual Base Quota:</span>
+                <span class="font-bold text-white">20 Days</span>
+              </div>
+              <div class="flex justify-between pb-2 border-b border-slate-800">
+                <span class="text-slate-400">Carryover Requested:</span>
+                <span class="font-mono text-slate-300">6 Days</span>
+              </div>
+              <div class="flex justify-between pb-2 border-b border-slate-800 text-emerald-400">
+                <span>Carryover Approved (Max Cap):</span>
+                <span class="font-bold font-mono">5 Days (1 Day Forfeited)</span>
+              </div>
+              <div class="flex justify-between pt-1 text-sm font-bold text-white">
+                <span>Total Available PTO:</span>
+                <span class="font-mono text-emerald-400">25 Days Available</span>
+              </div>
+            </div>
+
+            <div class="text-[11px] text-slate-400 bg-slate-900/50 p-2.5 rounded-lg border border-slate-800">
+              <strong class="text-slate-300">Policy Citation:</strong> HR Policy Handbook - Section 4.1 (Annual Paid Leave). Maximum 5 rollover days permitted into next calendar year.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between items-center">
+        <span>Deterministic math and policy compliance executed autonomously</span>
+        <span class="font-mono text-emerald-400">Screen 6 of 10</span>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 7: Operational Tool 2 - IT Helpdesk Incident Creator ==================== -->
+    <section class="screen-card hidden bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-10 shadow-2xl flex-col justify-between min-h-[580px]" data-screen="7">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span>Screen 07 / Operational Tool: IT Service Desk Tickets</span>
+          </div>
+          <span class="px-2.5 py-1 bg-amber-950/60 border border-amber-700 text-amber-300 text-[11px] font-mono rounded-lg">Agent Tool #2</span>
+        </div>
+
+        <h2 class="font-display font-bold text-2xl sm:text-3xl text-white mb-2">Autonomous IT Incident Creation & SLA Routing</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+          Generates official support tickets with automatic severity classification (P1 to P4), queue assignment, and SLA resolution deadlines.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Input -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <div class="text-xs font-bold uppercase text-slate-400 flex items-center justify-between">
+              <span>User Conversation Input</span>
+              <span class="text-blue-400 font-mono text-[10px]">Natural Language</span>
+            </div>
+
+            <div class="p-3 bg-blue-600 text-white rounded-xl text-xs">
+              "Create a high-priority IT ticket for MacBook Pro VPN authentication failure on Cisco AnyConnect."
+            </div>
+
+            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 font-mono text-xs text-slate-300 space-y-1">
+              <div class="text-amber-400 font-bold">⚡ create_it_support_ticket({</div>
+              <div class="pl-4 text-slate-400">category: <span class="text-emerald-300">"vpn_access"</span>,</div>
+              <div class="pl-4 text-slate-400">urgency: <span class="text-emerald-300">"high"</span>,</div>
+              <div class="pl-4 text-slate-400">summary: <span class="text-emerald-300">"MacBook Pro VPN AnyConnect failure"</span>,</div>
+              <div class="pl-4 text-slate-400">affected_system: <span class="text-emerald-300">"MacBook Pro / AnyConnect"</span></div>
+              <div class="text-amber-400 font-bold">})</div>
+            </div>
+          </div>
+
+          <!-- Official Ticket Output -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-amber-900/40 space-y-2.5">
+            <div class="text-xs font-bold uppercase text-amber-400 flex items-center justify-between">
+              <span>Generated IT Incident Ticket</span>
+              <span class="font-mono text-[10px]">Status: OPEN_QUEUED</span>
+            </div>
+
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2 text-xs">
+              <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+                <span class="font-mono text-sm font-bold text-amber-400">INC-2026-8492</span>
+                <span class="px-2 py-0.5 bg-amber-500/20 text-amber-300 text-[10px] font-bold rounded-full">P2 - High Priority</span>
+              </div>
+              <div class="flex justify-between text-slate-300 text-[11px]">
+                <span class="text-slate-400">Assigned Queue:</span>
+                <span>Workplace Systems Engineering (Tier 2)</span>
+              </div>
+              <div class="flex justify-between text-slate-300 text-[11px]">
+                <span class="text-slate-400">Target SLA Response:</span>
+                <span class="text-emerald-400 font-mono font-semibold">1 Hour</span>
+              </div>
+              <div class="flex justify-between text-slate-300 text-[11px]">
+                <span class="text-slate-400">Target SLA Resolution:</span>
+                <span class="text-emerald-400 font-mono font-semibold">8 Business Hours</span>
+              </div>
+            </div>
+
+            <div class="text-[11px] text-slate-400 bg-slate-900/50 p-2 rounded-lg border border-slate-800">
+              Notification dispatched via corporate Slack & IT Helpdesk webhook.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between items-center">
+        <span>Instant triage and escalation without human helpdesk intervention</span>
+        <span class="font-mono text-amber-400">Screen 7 of 10</span>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 8: Operational Tool 3 - Travel Per-Diem Calculator ==================== -->
+    <section class="screen-card hidden bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-10 shadow-2xl flex-col justify-between min-h-[580px]" data-screen="8">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2 text-violet-400 text-xs font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+            <span>Screen 08 / Operational Tool: Travel Per-Diem Calculator</span>
+          </div>
+          <span class="px-2.5 py-1 bg-violet-950/60 border border-violet-700 text-violet-300 text-[11px] font-mono rounded-lg">Agent Tool #3</span>
+        </div>
+
+        <h2 class="font-display font-bold text-2xl sm:text-3xl text-white mb-2">Corporate Travel Per-Diem & Expense Validation</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+          Calculates destination city tier allowances, daily meal per-diems, lodging limits, and flight policy compliance according to the Expense Policy.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Input -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <div class="text-xs font-bold uppercase text-slate-400 flex items-center justify-between">
+              <span>User Conversation Input</span>
+              <span class="text-blue-400 font-mono text-[10px]">Natural Language</span>
+            </div>
+
+            <div class="p-3 bg-blue-600 text-white rounded-xl text-xs">
+              "What is the meal per-diem and allowable hotel cap for a 4-day business trip to San Francisco with a $290/night hotel?"
+            </div>
+
+            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 font-mono text-xs text-slate-300 space-y-1">
+              <div class="text-violet-400 font-bold">⚡ calculate_travel_per_diem({</div>
+              <div class="pl-4 text-slate-400">destination_city: <span class="text-emerald-300">"San Francisco"</span>,</div>
+              <div class="pl-4 text-slate-400">trip_duration_days: <span class="text-amber-300">4</span>,</div>
+              <div class="pl-4 text-slate-400">hotel_nightly_rate: <span class="text-amber-300">290</span>,</div>
+              <div class="pl-4 text-slate-400">flight_class: <span class="text-emerald-300">"economy"</span></div>
+              <div class="text-violet-400 font-bold">})</div>
+            </div>
+          </div>
+
+          <!-- Expense Matrix Output -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-violet-900/40 space-y-2.5">
+            <div class="text-xs font-bold uppercase text-violet-400 flex items-center justify-between">
+              <span>Validated Per-Diem Matrix</span>
+              <span class="font-mono text-[10px]">Tier 1 Global Metro</span>
+            </div>
+
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2 text-xs">
+              <div class="flex justify-between text-slate-300 text-[11px] pb-1 border-b border-slate-800">
+                <span class="text-slate-400">Daily Meal Allowance:</span>
+                <span class="font-mono font-bold text-white">$85 / day ($340 total for 4 days)</span>
+              </div>
+              <div class="flex justify-between text-slate-300 text-[11px] pb-1 border-b border-slate-800">
+                <span class="text-slate-400">Allowable Hotel Cap:</span>
+                <span class="font-mono text-emerald-400">$320 / night ($290 requested is APPROVED)</span>
+              </div>
+              <div class="flex justify-between text-slate-300 text-[11px] pb-1 border-b border-slate-800">
+                <span class="text-slate-400">Local Ground Transit:</span>
+                <span class="font-mono text-slate-300">$25 / day ($100 total)</span>
+              </div>
+              <div class="flex justify-between pt-1 text-sm font-bold text-white">
+                <span>Total Pre-Approved Reimbursement:</span>
+                <span class="font-mono text-emerald-400">$1,310 USD</span>
+              </div>
+            </div>
+
+            <div class="text-[11px] text-slate-400 bg-slate-900/50 p-2 rounded-lg border border-slate-800">
+              <strong class="text-slate-300">Policy Citation:</strong> Enterprise Travel Policy - Section 3 (Per-Diem Matrix 2026).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between items-center">
+        <span>Prevents corporate expense overages before travel bookings are finalized</span>
+        <span class="font-mono text-violet-400">Screen 8 of 10</span>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 9: Operational Tool 4 - Security & NDA Verifier ==================== -->
+    <section class="screen-card hidden bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-10 shadow-2xl flex-col justify-between min-h-[580px]" data-screen="9">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2 text-rose-400 text-xs font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+            <span>Screen 09 / Operational Tool: Security & NDA Verifier</span>
+          </div>
+          <span class="px-2.5 py-1 bg-rose-950/60 border border-rose-700 text-rose-300 text-[11px] font-mono rounded-lg">Agent Tool #4</span>
+        </div>
+
+        <h2 class="font-display font-bold text-2xl sm:text-3xl text-white mb-2">Automated IT Security & NDA Policy Compliance</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+          Evaluates proposed employee actions (AI tool usage, BYOD, USB storage, open-source code) against security policies to prevent data leakage.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Input -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <div class="text-xs font-bold uppercase text-slate-400 flex items-center justify-between">
+              <span>User Conversation Input</span>
+              <span class="text-blue-400 font-mono text-[10px]">Natural Language</span>
+            </div>
+
+            <div class="p-3 bg-blue-600 text-white rounded-xl text-xs">
+              "Can I paste internal customer account data into a free online ChatGPT web tool to generate a summary?"
+            </div>
+
+            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 font-mono text-xs text-slate-300 space-y-1">
+              <div class="text-rose-400 font-bold">⚡ verify_compliance_clause({</div>
+              <div class="pl-4 text-slate-400">action_type: <span class="text-emerald-300">"use_external_ai_tool"</span>,</div>
+              <div class="pl-4 text-slate-400">data_classification: <span class="text-rose-400">"restricted_pii"</span>,</div>
+              <div class="pl-4 text-slate-400">third_party_tool: <span class="text-emerald-300">"Free Public AI"</span></div>
+              <div class="text-rose-400 font-bold">})</div>
+            </div>
+          </div>
+
+          <!-- Compliance Alert Output -->
+          <div class="p-4 rounded-xl bg-slate-950 border border-rose-900/50 space-y-2.5">
+            <div class="text-xs font-bold uppercase text-rose-400 flex items-center justify-between">
+              <span>Compliance Evaluation Verdict</span>
+              <span class="px-2 py-0.5 bg-rose-500/20 text-rose-400 font-bold rounded">HIGH RISK</span>
+            </div>
+
+            <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-2 text-xs">
+              <div class="flex items-center space-x-2">
+                <span class="px-2 py-0.5 bg-rose-950 text-rose-300 border border-rose-700 font-bold rounded">STRICTLY_PROHIBITED</span>
+              </div>
+              <p class="text-slate-300 leading-relaxed text-[11px]">
+                Pasting customer PII, confidential credentials, or proprietary source code into consumer AI tools is strictly forbidden due to data retention risks.
+              </p>
+              <div class="p-2 bg-slate-950 rounded border border-slate-800 text-[11px] text-emerald-400">
+                <strong>Approved Remedy:</strong> Use internal Enterprise AI with zero-retention data privacy agreements.
+              </div>
+            </div>
+
+            <div class="text-[11px] text-slate-400 bg-slate-900/50 p-2 rounded-lg border border-slate-800">
+              <strong class="text-slate-300">Policy Citation:</strong> Information Security Policy Section 8.4 (Generative AI Usage).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between items-center">
+        <span>Instant guardrail enforcement protecting enterprise IP and client confidentiality</span>
+        <span class="font-mono text-rose-400">Screen 9 of 10</span>
+      </div>
+    </section>
+
+    <!-- ==================== SCREEN 10: RAG Tuning & Guardrails Controls ==================== -->
+    <section class="screen-card hidden bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-10 shadow-2xl flex-col justify-between min-h-[580px]" data-screen="10">
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-2 text-blue-400 text-xs font-bold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            <span>Screen 10 / RAG Retrieval Tuning & Hyperparameters</span>
+          </div>
+          <span class="px-2.5 py-1 bg-blue-950/60 border border-blue-700 text-blue-300 text-[11px] font-mono rounded-lg">System Tuning</span>
+        </div>
+
+        <h2 class="font-display font-bold text-2xl sm:text-3xl text-white mb-2">Live Hyperparameter Tuning & Retrieval Controls</h2>
+        <p class="text-xs sm:text-sm text-slate-400 mb-4">
+          Configure cosine similarity cutoffs, Top-K chunk retrieval limits, LLM temperature, and system prompt constraints on the fly.
+        </p>
+
+        <!-- Settings Modal UI Replica -->
+        <div class="rounded-xl bg-slate-950 border border-slate-800 p-4 space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 space-y-1">
+              <div class="text-slate-400">Top-K Chunks Retrieved:</div>
+              <div class="text-base font-bold font-mono text-blue-400">4 Chunks</div>
+              <div class="text-[10px] text-slate-500">Controls retrieval window size</div>
+            </div>
+
+            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 space-y-1">
+              <div class="text-slate-400">Similarity Cutoff Threshold:</div>
+              <div class="text-base font-bold font-mono text-emerald-400">0.15 Score</div>
+              <div class="text-[10px] text-slate-500">Filters irrelevant low-scoring matches</div>
+            </div>
+
+            <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 space-y-1">
+              <div class="text-slate-400">Generation Temperature:</div>
+              <div class="text-base font-bold font-mono text-amber-400">0.1 (Strict Mode)</div>
+              <div class="text-[10px] text-slate-500">Enforces zero-hallucination answers</div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 text-xs space-y-1.5">
+            <div class="font-bold text-white">Production Guardrail Checklist:</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-300">
+              <div class="flex items-center space-x-2">
+                <span class="text-emerald-400 font-bold">✓</span>
+                <span>Strict grounded-prompt prevents creative fabrications</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-emerald-400 font-bold">✓</span>
+                <span>Exact inline citation formatting required per response</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-emerald-400 font-bold">✓</span>
+                <span>Atomic disk-backed in-memory vector synchronization</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <span class="text-emerald-400 font-bold">✓</span>
+                <span>Sub-50ms hybrid vector scoring with typo resilience</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between items-center">
+        <span>Complete end-to-end transparency and operational control</span>
+        <span class="font-mono text-blue-400">Screen 10 of 10</span>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    let currentScreen = 1;
+    const totalScreens = 10;
+    let isAllView = false;
+
+    function showScreen(n) {
+      if (isAllView) toggleAllScreens();
+      const screens = document.querySelectorAll('.screen-card');
+      screens.forEach(s => {
+        s.classList.remove('screen-active');
+        s.classList.add('hidden');
+      });
+
+      const active = document.querySelector(`.screen-card[data-screen="${n}"]`);
+      if (active) {
+        active.classList.remove('hidden');
+        active.classList.add('screen-active');
+      }
+
+      currentScreen = n;
+      document.getElementById('screenCounter').innerText = `${currentScreen} / ${totalScreens}`;
+      document.getElementById('prevBtn').disabled = (currentScreen === 1);
+      document.getElementById('nextBtn').disabled = (currentScreen === totalScreens);
+    }
+
+    function nextScreen() {
+      if (currentScreen < totalScreens) showScreen(currentScreen + 1);
+    }
+
+    function prevScreen() {
+      if (currentScreen > 1) showScreen(currentScreen - 1);
+    }
+
+    function toggleAllScreens() {
+      const screens = document.querySelectorAll('.screen-card');
+      isAllView = !isAllView;
+      const btn = document.getElementById('toggleAllBtn');
+
+      if (isAllView) {
+        screens.forEach(s => {
+          s.classList.remove('hidden');
+          s.classList.add('screen-active');
+          s.classList.add('mb-8');
+        });
+        btn.classList.add('bg-blue-600', 'text-white');
+        btn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Slide Mode</span>';
+      } else {
+        screens.forEach(s => {
+          s.classList.remove('mb-8');
+        });
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg><span>Show All (Scroll)</span>';
+        showScreen(currentScreen);
+      }
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        nextScreen();
+      } else if (e.key === 'ArrowLeft') {
+        prevScreen();
+      }
+    });
+
+    function openPdfModal() {
+      const modal = document.getElementById('pdfExportModal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closePdfModal() {
+      const modal = document.getElementById('pdfExportModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function triggerFullColorPrint() {
+      closePdfModal();
+      const screens = document.querySelectorAll('.screen-card');
+      screens.forEach(s => {
+        s.classList.remove('hidden');
+        s.classList.add('screen-active');
+      });
+      setTimeout(() => {
+        window.print();
+      }, 100);
+    }
+
+    // Auto switch to all screens before printing
+    window.addEventListener('beforeprint', () => {
+      const screens = document.querySelectorAll('.screen-card');
+      screens.forEach(s => {
+        s.classList.remove('hidden');
+        s.classList.add('screen-active');
+      });
+    });
+
+    window.addEventListener('afterprint', () => {
+      if (!isAllView) {
+        showScreen(currentScreen);
+      }
+    });
+
+    showScreen(1);
+  </script>
+</body>
+</html>

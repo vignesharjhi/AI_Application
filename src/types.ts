@@ -43,6 +43,7 @@ export interface ToolCallInfo {
   tool: string;
   input: string;
   summary: string;
+  policyReference?: string | null;
   sourceUrls?: { title: string; url: string }[] | null;
 }
 
